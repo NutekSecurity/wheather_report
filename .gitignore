@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# don't add charts and plots to git repository
+oanda_charts-*
