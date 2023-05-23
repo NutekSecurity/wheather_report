@@ -187,4 +187,3 @@ for index, instrument in enumerate(instruments):
     ohlc_d = parse_ohlc(response_d)   
     plotting(ohlc_h1, "{} - {}".format(instrument_name, "1 Hour"), directory_path)
     plotting(ohlc_d,  "{} - {}".format(instrument_name, "Day"), directory_path)
-    exit()
