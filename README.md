@@ -1,13 +1,17 @@
 # Ichimoku-CCI_H1-D
-Python script  that fetches data from Oanda API, saves Ichimoku Cloud and Commodity Channel Index plots
+Python script  that fetches data from _Oanda API_, saves **Ichimoku Cloud** and **Commodity Channel Index** plots and in other file **MACD** and **RSI** for Daily and 1 hour timeperiod.
 
 ## Examples
 
 ### 1 Hour timeframe
 ![CHF/JPY 1 Hour chart](CHF_JPY%20-%201%20Hour%20-%202023-03-08-T16_00_00Z.png "CHF/JPY 1 Hour")
 
+![CHF/JPY 1 Hour MACD and RSI plot](CHF_JPY%20-%201%20Hour%20MACD%20and%20RSI%20-%202023-05-23-T09_00_00Z.png "CHF/JPY 1 Hour MACD and RSI")
+
 ### Daily timeframe
 ![CHF/JPY Daily chart](CHF_JPY%20-%20Day%20-%202023-03-07-T22_00_00Z.png "CHF/JPY Daily")
+
+![CHF/JPY Daily MACD and RSI plot](CHF_JPY%20-%20Day%20MACD%20and%20RSI%20-%202023-05-22-T21_00_00Z.png "CHF/JPY Daily MACD and RSI")
 
 ## Usage
 
