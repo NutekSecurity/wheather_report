@@ -18,8 +18,8 @@ def plotting(frame,title,path):
     fig = mpf.figure(style=s,figsize=(16,9))
     ax1 = fig.add_subplot(3,1,1)
     last_date = frame.index[-1]
-    title = "{} - {}".format(title, str(last_date.strftime('%Y-%m-%d-T%H_%M_%SZ')))
-    ax1.set_title(title)
+    title_of_plot = "{} Ichiomku and CCI - {}".format(title, str(last_date.strftime('%Y-%m-%d-T%H_%M_%SZ')))
+    ax1.set_title(title_of_plot)
     ax2 = fig.add_subplot(3,1,2,sharex=ax1)
     ax3 = fig.add_subplot(3,1,3,sharex=ax1)
     high9=frame.High.rolling(9).max()
@@ -54,7 +54,63 @@ def plotting(frame,title,path):
     ax3.fill_between([x for x in range(0,len(frame))],frame.cci,frame.cci_overbought,where=frame.cci>frame.cci_overbought,color='lightcoral')
     ax3.fill_between([x for x in range(0,len(frame))],frame.cci,frame.cci_oversold,where=frame.cci<frame.cci_oversold,color='lightgreen')
     mpf.plot(frame,ax=ax1,volume=ax2,type='line',xrotation=0,addplot=apds,tight_layout=True)
-    fig.savefig("{}/{}.png".format(path, title))
+    fig.savefig("{}/{}.png".format(path, title_of_plot))
+    plt.close(fig)
+    
+    # MACD and RSI chart
+    fig = mpf.figure(style=s,figsize=(16,9))
+    ax1 = fig.add_subplot(4,1,1)
+    ax2 = fig.add_subplot(4,1,2,sharex=ax1)
+    ax3 = fig.add_subplot(4,1,3,sharex=ax1)
+    ax4 = fig.add_subplot(4,1,4,sharex=ax1)
+    last_date = frame.index[-1]
+    title_of_plot = "{} MACD and RSI - {}".format(title, str(last_date.strftime('%Y-%m-%d-T%H_%M_%SZ')))
+    ax1.set_title(title_of_plot)
+    # Calculate the MACD
+    exp12     = frame['Close'].ewm(span=12, adjust=False).mean()
+    exp26     = frame['Close'].ewm(span=26, adjust=False).mean()
+    macd      = exp12 - exp26
+    signal    = macd.ewm(span=9, adjust=False).mean()
+    histogram = macd - signal
+
+    fb_green = dict(y1=macd.values,y2=signal.values,where=signal<macd,color="#93c47d",alpha=0.6,interpolate=True)
+    fb_red   = dict(y1=macd.values,y2=signal.values,where=signal>macd,color="#e06666",alpha=0.6,interpolate=True)
+    fb_green['panel'] = 1
+    fb_red['panel'] = 1
+    fb       = [fb_green,fb_red]
+    # Calculate the RSI
+    rsi = talib.RSI(frame["Close"], timeperiod=14)
+    frame['rsi'] = rsi
+    frame['rsi_overbought'] = [70.]*len(frame)
+    frame['rsi_oversold'] = [30.]*len(frame)
+    apds = [#mpf.make_addplot(exp12,color='lime'),
+            #mpf.make_addplot(exp26,color='c'),
+            mpf.make_addplot(histogram,type='bar',width=0.7,
+                            color='dimgray',alpha=1,secondary_y=True,ax=ax2),
+            mpf.make_addplot(macd,
+                             ylabel='MACD',
+                             color='fuchsia',secondary_y=False,ax=ax2),
+            mpf.make_addplot(signal,
+                             color='b',secondary_y=False,ax=ax2),
+            mpf.make_addplot(rsi, 
+                            ylabel='RSI',
+                               ax=ax3),
+            mpf.make_addplot(frame['rsi_overbought'], 
+                               linestyle='-.',secondary_y=False, color='red',ax=ax3),
+            mpf.make_addplot(frame['rsi_oversold'], 
+                               linestyle='-.',secondary_y=False, color='green',ax=ax3),
+        ]
+    ax3.fill_between([x for x in range(0,len(frame))],frame.rsi,frame.rsi_overbought,where=frame.rsi>frame.rsi_overbought,color='lightcoral')
+    ax3.fill_between([x for x in range(0,len(frame))],frame.rsi,frame.rsi_oversold,where=frame.rsi<frame.rsi_oversold,color='lightgreen')
+    # Plot the data
+    mpf.plot(frame,
+             ax=ax1,
+             volume=ax4,
+             type='line',xrotation=0,addplot=apds,tight_layout=True,
+             fill_between=fb)
+    fig.savefig("{}/{}.png".format(path, title_of_plot))
+    plt.close(fig)
+
 
 def parse_ohlc(response):
     # Extract candle data from response
@@ -131,4 +187,4 @@ for index, instrument in enumerate(instruments):
     ohlc_d = parse_ohlc(response_d)   
     plotting(ohlc_h1, "{} - {}".format(instrument_name, "1 Hour"), directory_path)
     plotting(ohlc_d,  "{} - {}".format(instrument_name, "Day"), directory_path)
-    
+    exit()
