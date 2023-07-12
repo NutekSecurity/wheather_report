@@ -130,3 +130,6 @@ dmypy.json
 
 # don't add charts and plots to git repository
 oanda_charts-*
+finance_charts-*
+.vscode/
+launch.json
