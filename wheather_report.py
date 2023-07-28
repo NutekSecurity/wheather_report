@@ -10,6 +10,7 @@ import argparse
 from argparse import RawTextHelpFormatter
 from progress1bar import ProgressBar
 import finnhub
+import csv
 
 def plotting(frame,title,path):
     
@@ -168,8 +169,9 @@ python3 weather_report.py --token <your_oanda_token> --account <your_account_id>
 python3 weather_report.py --token <your_oanda_token> --account <your_account_id> --instruments all
 python3 weather_report.py --token <your_oanda_oken> --account <your_account_id> --list
 python3 weather_report.py --token <your_oanda_demo_token> --account <your_account_id> --practice --instruments EUR_USD,USD_JPY,GBP_USD
-python3 weather_report.py --token <your_finnhub_token> --stocks --instruments AAPL,MSFT,AMZN
-python3 weather_report.py --token <your_finnhub_token> --stocks --list | less
+python3 weather_report.py --token <your_finnhub_token> --stocks AAPL,MSFT,AMZN
+python3 weather_report.py --token <your_finnhub_token> --list-exchanges 
+python3 weather_report.py --token <your_finnhub_token> --exchange WA | less
 
 '''
 # Create an ArgumentParser object
@@ -178,23 +180,38 @@ parser = argparse.ArgumentParser(description=program_description, formatter_clas
 parser.add_argument('--token', type=str, help='Enter your Oanda API token', required=True)
 parser.add_argument('--account', type=str, help='Enter your account id (required for Oanda)', required=False)
 parser.add_argument('--practice', action='store_true', help='Wheter to use Oanda practice account')
-parser.add_argument('--instruments', type=str, help='Enter the instruments to download plots or all', required=False)
-parser.add_argument('--list', action='store_true', help='List all instruments')
-parser.add_argument('--stocks', action='store_true', help='Wheter to use stocks data (provide Finnhub API key as --token)')
+parser.add_argument('--instruments', type=str, help='Enter the Oanda instruments to download plots or all', required=False)
+parser.add_argument('--list', action='store_true', help='List all Oanda (CFD) instruments')
+parser.add_argument('--stocks', type=str, help='Enter stock tickers to download plots (provide Finnhub API key as --token) using all require --exchange to download from', required=False)
+parser.add_argument('--list-exchanges', action='store_true', help='List all stock exchanges')
+parser.add_argument('--exchange', type=str, help='List stocks on exchange [default: US]', required=False)
 # Parse the command-line arguments
 args = parser.parse_args()
 
+if args.exchange:
+    finnhub_client = finnhub.Client(api_key=args.token)
+    instruments = finnhub_client.stock_symbols(args.exchange)
+    # get only symbols
+    instruments = [x['symbol'] for x in instruments]
+    # sort alphabetically
+    instruments.sort()
+    for instrument in instruments:
+        print(instrument)
+    exit()
+if args.list_exchanges:
+    finnhub_client = finnhub.Client(api_key=args.token)
+    # https://finnhub.io/docs/api/stock-symbols
+    # Read csv file Finnhub Exchanges.csv from the same directory
+    file = open('Finnhub Exchanges.csv', 'r')
+    exchanges = csv.reader(file)
+    exchanges = list(exchanges)
+    # print all exchanges
+    for exchange in exchanges[1:]:
+        print('{} - {}'.format(exchange[0], exchange[1]))
+    file.close()
+    exit()
 if args.stocks:
     finnhub_client = finnhub.Client(api_key=args.token)
-    if args.list:
-        instruments = finnhub_client.stock_symbols('US')
-        # get only symbols
-        instruments = [x['symbol'] for x in instruments]
-        # sort alphabetically
-        instruments.sort()
-        for instrument in instruments:
-            print(instrument)
-        exit()
     # time now in milliseconds
     now = datetime.now()
     # convert to seconds
@@ -215,17 +232,17 @@ if args.stocks:
     else:
         print(f"Directory already exists at {directory_path}")
     instruments = []
-    if args.instruments == 'all':
+    if args.stocks == 'all':
         # get all instruments
-        instruments = finnhub_client.stock_symbols('US')
+        instruments = finnhub_client.stock_symbols(args.exchange)
         # get only symbols
         instruments = [x['symbol'] for x in instruments]
     else:
-        instruments = args.instruments.split(',')
+        instruments = args.stocks.split(',')
         if len(instruments) < 1:
-            instruments = args.instruments.split(' ')
+            instruments = args.stocks.split(' ')
             if len(instruments) < 1:
-                instruments = args.instruments
+                instruments = args.stocks
                 if len(instruments) < 1:
                     print('No instruments provided')
                     exit(1)
