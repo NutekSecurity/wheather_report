@@ -1,0 +1,42 @@
+appdirs @ file:///home/conda/feedstock_root/build_artifacts/appdirs_1603108395799/work
+beautifulsoup4 @ file:///home/conda/feedstock_root/build_artifacts/beautifulsoup4_1680888073205/work
+Brotli @ file:///Users/runner/miniforge3/conda-bld/brotli-split_1687884292427/work
+certifi==2023.7.22
+cffi @ file:///Users/runner/miniforge3/conda-bld/cffi_1671179893800/work
+charset-normalizer @ file:///home/conda/feedstock_root/build_artifacts/charset-normalizer_1688813409104/work
+colorama==0.4.6
+contourpy @ file:///Users/runner/miniforge3/conda-bld/contourpy_1686733985009/work
+cryptography @ file:///Users/runner/miniforge3/conda-bld/cryptography-split_1689056134643/work
+cursor==1.3.5
+cycler @ file:///home/conda/feedstock_root/build_artifacts/cycler_1635519461629/work
+finnhub-python @ file:///home/conda/feedstock_root/build_artifacts/finnhub-python_1682823818213/work
+fonttools @ file:///Users/runner/miniforge3/conda-bld/fonttools_1686578575353/work
+frozendict @ file:///Users/runner/miniforge3/conda-bld/frozendict_1682808318158/work
+html5lib @ file:///home/conda/feedstock_root/build_artifacts/html5lib_1592930327044/work
+idna @ file:///home/conda/feedstock_root/build_artifacts/idna_1663625384323/work
+kiwisolver @ file:///Users/runner/miniforge3/conda-bld/kiwisolver_1666805765141/work
+lxml @ file:///Users/runner/miniforge3/conda-bld/lxml_1688564837095/work
+matplotlib @ file:///Users/runner/miniforge3/conda-bld/matplotlib-suite_1688684919187/work
+mplfinance @ file:///home/conda/feedstock_root/build_artifacts/mplfinance_1670816160016/work
+multitasking @ file:///home/conda/feedstock_root/build_artifacts/multitasking_1622493113162/work
+munkres==1.1.4
+numpy @ file:///Users/runner/miniforge3/conda-bld/numpy_1688887113898/work
+packaging @ file:///home/conda/feedstock_root/build_artifacts/packaging_1681337016113/work
+pandas @ file:///Users/runner/miniforge3/conda-bld/pandas_1688740646538/work
+Pillow @ file:///Users/runner/miniforge3/conda-bld/pillow_1688255970033/work
+progress1bar==0.3.0
+pycparser @ file:///home/conda/feedstock_root/build_artifacts/pycparser_1636257122734/work
+pyparsing @ file:///home/conda/feedstock_root/build_artifacts/pyparsing_1652235407899/work
+PySocks @ file:///home/conda/feedstock_root/build_artifacts/pysocks_1661604839144/work
+python-dateutil @ file:///home/conda/feedstock_root/build_artifacts/python-dateutil_1626286286081/work
+pytz @ file:///home/conda/feedstock_root/build_artifacts/pytz_1680088766131/work
+requests @ file:///home/conda/feedstock_root/build_artifacts/requests_1684774241324/work
+six @ file:///home/conda/feedstock_root/build_artifacts/six_1620240208055/work
+soupsieve @ file:///home/conda/feedstock_root/build_artifacts/soupsieve_1658207591808/work
+TA-Lib @ file:///Users/runner/miniforge3/conda-bld/ta-lib_1685085659028/work
+tornado @ file:///Users/runner/miniforge3/conda-bld/tornado_1684150425472/work
+tzdata @ file:///home/conda/feedstock_root/build_artifacts/python-tzdata_1680081134351/work
+unicodedata2 @ file:///Users/runner/miniforge3/conda-bld/unicodedata2_1667239979860/work
+urllib3 @ file:///home/conda/feedstock_root/build_artifacts/urllib3_1688005749963/work
+webencodings==0.5.1
+yfinance @ file:///home/conda/feedstock_root/build_artifacts/yfinance_1689949955437/work

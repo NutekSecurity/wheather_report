@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
 import mplfinance as mpf
 import matplotlib.pyplot as plt
 import talib
@@ -11,6 +11,7 @@ from argparse import RawTextHelpFormatter
 from progress1bar import ProgressBar
 import finnhub
 import csv
+import yfinance as yf
 
 def plotting(frame,title,path):
     
@@ -150,7 +151,7 @@ def parse_finnohlc(response):
     ohlc.columns = ['Close', 'High', 'Low', 'Open', 'Volume']
     return ohlc
 
-program_description = '''Wheather Report v0.1
+program_description = '''Wheather Report v0.2
 This program should help you get the most out of the market.
 Just let the money flow, and don't swim with the sharks!.
 Author: Szymon Błaszczyński for Nutek Security Solutions
@@ -172,12 +173,14 @@ python3 weather_report.py --token <your_oanda_demo_token> --account <your_accoun
 python3 weather_report.py --token <your_finnhub_token> --stocks AAPL,MSFT,AMZN
 python3 weather_report.py --token <your_finnhub_token> --list-exchanges 
 python3 weather_report.py --token <your_finnhub_token> --exchange WA | less
+python3 wheater_report.py --yahoo AAPL
+python3 wheater_report.py --yahoo "" --from-file tickers.txt
 
 '''
 # Create an ArgumentParser object
 parser = argparse.ArgumentParser(description=program_description, formatter_class=RawTextHelpFormatter)
 # Add a named argument
-parser.add_argument('--token', type=str, help='Enter your Oanda API token', required=True)
+parser.add_argument('--token', type=str, help='Enter your Oanda API token', required=False)
 parser.add_argument('--account', type=str, help='Enter your account id (required for Oanda)', required=False)
 parser.add_argument('--practice', action='store_true', help='Wheter to use Oanda practice account')
 parser.add_argument('--instruments', type=str, help='Enter the Oanda instruments to download plots or all', required=False)
@@ -185,9 +188,63 @@ parser.add_argument('--list', action='store_true', help='List all Oanda (CFD) in
 parser.add_argument('--stocks', type=str, help='Enter stock tickers to download plots (provide Finnhub API key as --token) using all require --exchange to download from', required=False)
 parser.add_argument('--list-exchanges', action='store_true', help='List all stock exchanges')
 parser.add_argument('--exchange', type=str, help='List stocks on exchange [default: US]', required=False)
+parser.add_argument('--yahoo', type=str, help='Get data from Yahoo Finance. No API key [free!] needed although only daily charts are supported', required=False)
+parser.add_argument('--from-file', type=str, help='Get data from file. File should contain a list of instruments separated by a newline. Use one of Yahoo, Oanda or Finnhub --switch with empty value \"\"', required=False)
 # Parse the command-line arguments
 args = parser.parse_args()
 
+if args.yahoo or args.from_file and not args.token:
+    if args.from_file:
+    # open file and read the content in a list
+        with open(args.from_file, 'r') as filehandle:
+            instruments = [current_instrument.rstrip() for current_instrument in filehandle.readlines()]
+    else:
+        instruments = args.yahoo.split(',')
+        if len(instruments) < 1:
+            instruments = args.yahoo.split(' ')
+            if len(instruments) < 1:
+                instruments = args.yahoo
+                if len(instruments) < 1:
+                    if len(instruments) < 1:
+                        print('No instruments provided')
+                        exit(1)
+    # Format datetime as string
+    now_utc = datetime.utcnow()
+    formatted_date = now_utc.strftime('%Y-%m-%d-T%H_%M_%SZ')
+    # specify the directory path
+    directory_path = "finance_charts-{}".format(formatted_date)
+    # check if directory exists, if not then create it
+    if not os.path.exists(directory_path):
+        os.makedirs(directory_path)
+        print(f"Directory created at {directory_path}")
+    else:
+        print(f"Directory already exists at {directory_path}")
+    print("Downloading {} instruments".format(len(instruments)))
+    completed_message = 'Download and chart drawing complete'
+    with ProgressBar(total=len(instruments), completed_message=completed_message, clear_alias=True, show_fraction=False, show_prefix=False, show_duration=True) as pb:    
+        for ticker in instruments:
+            pb.alias = ticker
+            # get data on this ticker
+            tickerData = yf.Ticker(ticker)
+            info = tickerData.info
+            # get today date in format YYYY-MM-DD
+            today = datetime.today().strftime('%Y-%m-%d')
+            # get the date one year before today
+            last_year = datetime.today() - timedelta(days=1250)
+            # get the historical prices for this ticker
+            tickerDf1d = tickerData.history(period='1d', start=last_year, end=today)
+            # get current hour
+            # today = datetime.today().strftime('%Y-%m-%d-%H')[:-3]
+            # get date 1250 hours ago
+            # last_1250_hours = datetime.today() - timedelta(hours=700)
+            # get the historical prices for this ticker
+            # tickerDf1h = tickerData.history(period='1h', start=last_1250_hours, end=today)
+            name = info['shortName']
+            plotting(tickerDf1d,  "{} - {}".format(name, "Day"), directory_path)
+            # plotting(tickerDf1h,  "{} - {}".format(name, "1 Hour"), directory_path)
+            pb.count += 1
+    exit()
+            
 if args.exchange:
     finnhub_client = finnhub.Client(api_key=args.token)
     instruments = finnhub_client.stock_symbols(args.exchange)
@@ -210,7 +267,7 @@ if args.list_exchanges:
         print('{} - {}'.format(exchange[0], exchange[1]))
     file.close()
     exit()
-if args.stocks:
+if args.stocks or args.from_file and not args.account:
     finnhub_client = finnhub.Client(api_key=args.token)
     # time now in milliseconds
     now = datetime.now()
@@ -238,14 +295,20 @@ if args.stocks:
         # get only symbols
         instruments = [x['symbol'] for x in instruments]
     else:
-        instruments = args.stocks.split(',')
-        if len(instruments) < 1:
-            instruments = args.stocks.split(' ')
+        if args.from_file:
+        # open file and read the content in a list
+            with open(args.from_file, 'r') as filehandle:
+                instruments = [current_instrument.rstrip() for current_instrument in filehandle.readlines()]
+        else:
+            instruments = args.stocks.split(',')
             if len(instruments) < 1:
-                instruments = args.stocks
+                instruments = args.stocks.split(' ')
                 if len(instruments) < 1:
-                    print('No instruments provided')
-                    exit(1)
+                    instruments = args.stocks
+                    if len(instruments) < 1:
+                        if len(instruments) < 1:
+                            print('No instruments provided')
+                            exit(1)
     print("Downloading {} instruments".format(len(instruments)))
     completed_message = 'Download and chart drawing complete'
     with ProgressBar(total=len(instruments), completed_message=completed_message, clear_alias=True, show_fraction=False, show_prefix=False, show_duration=True) as pb:
@@ -264,6 +327,9 @@ if args.stocks:
             pb.count += 1
     exit()
 
+if args.account is None:
+    print('Account ID required')
+    exit(1)
 if args.practice:
     uri = 'https://api-fxpractice.oanda.com/v3/'
 else:
@@ -296,12 +362,19 @@ inst_len = len(instruments)
 if args.instruments == 'all':
     pass
 else:
-    instruments_args = args.instruments.split(',')
-    if len(instruments_args) == 0:
-        instruments_args = args.instruments.split(' ')
+    if args.from_file:
+        # open file and read the content in a list
+        with open(args.from_file, 'r') as filehandle:
+            instruments_args = [current_instrument.rstrip() for current_instrument in filehandle.readlines()]
+    else:
+        instruments_args = args.instruments.split(',')
         if len(instruments_args) == 0:
-            print("Instrument {} not found".format(args.instruments))
-            exit()
+            instruments_args = args.instruments.split(' ')
+            if len(instruments_args) == 0:
+                
+                if len(instruments_args) == 0:
+                    print("Instrument {} not found".format(args.instruments))
+                    exit(1)
     instruments = [x for x in instruments if x['name'] in instruments_args]
     if len(instruments) == 0:
         print("Instrument {} not found".format(args.instruments))

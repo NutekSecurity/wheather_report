@@ -134,3 +134,4 @@ finance_charts-*
 .vscode/
 launch.json.DS_Store
 launch.json
+.DS_Store
